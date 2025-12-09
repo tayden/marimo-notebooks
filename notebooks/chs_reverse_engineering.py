@@ -345,7 +345,7 @@ def _(coef):
 
     start_time = perf_counter()
 
-    times_to_fetch = list(dt_range(datetime(2020,1,1), datetime(2025,1,1), timedelta(minutes=5)))
+    times_to_fetch = list(dt_range(datetime(2023,1,1), datetime(2025,1,1), timedelta(minutes=5)))
     tides_five_minutes = utide.reconstruct(times_to_fetch, coef).h
 
     elapsed_time = perf_counter() - start_time
