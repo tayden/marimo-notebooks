@@ -25,6 +25,8 @@ with app.setup:
     import numpy as np
     import polars as pl
     import pandas as pd
+    import plotly.graph_objects as go
+    from plotly.subplots import make_subplots
 
 
 @app.cell(hide_code=True)
@@ -146,7 +148,7 @@ def _(tide_data):
         pl.col("eventDate").str.to_datetime(format="%Y-%m-%dT%H:%M:%SZ").alias("time"),
         pl.col("value").alias("elevation")
     )
-    mo.ui.dataframe(df)
+    df
     return (df,)
 
 
@@ -160,12 +162,9 @@ def _():
 
 @app.cell
 def _(df, selected_station):
-    time = df["time"].to_pandas()
-    elevation = df["elevation"].to_pandas()
-
     coef = utide.solve(
-        time,
-        elevation,
+        df["time"].to_numpy(),
+        df["elevation"].to_numpy(),
         lat=selected_station["latitude"],
         nodal=True,
         trend=True,
@@ -205,7 +204,7 @@ def _(coef):
         }
     ).sort_values("amplitude", ascending=False)
 
-    mo.ui.dataframe(constituents_df)
+    constituents_df
     return
 
 
@@ -227,7 +226,7 @@ def _():
 
 @app.cell
 def _():
-    test_date_range = mo.ui.date_range(label="Test tide model to 15min tides between",
+    test_date_range = mo.ui.date_range(label="Test tide data range",
                                        value=(date(2020, 1, 1), date(2020, 6, 1)))
     test_date_range
     return (test_date_range,)
@@ -262,16 +261,13 @@ def _(selected_station, should_fetch_test_tides_btn, test_date_range):
 
 @app.cell
 def _(test_df):
-    test_time = test_df["time"].to_pandas()
-    test_elevation = test_df["elevation"].to_pandas()
+    test_time = test_df["time"].to_numpy()
+    test_elevation = test_df["elevation"].to_numpy()
     return test_elevation, test_time
 
 
 @app.cell
 def _(coef, test_elevation, test_time):
-    import plotly.graph_objects as go
-    from plotly.subplots import make_subplots
-
     reconstruction = utide.reconstruct(test_time, coef)
     residuals = test_elevation - reconstruction.h
 
