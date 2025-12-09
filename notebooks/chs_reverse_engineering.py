@@ -94,7 +94,7 @@ def get_tide_data(
     result = []
 
     for from_, to_ in mo.status.progress_bar(list(pairwise(dates))):
-        sleep(2)
+        sleep(2)  # Have to go slow to not hit the CHS api limits...
         res = httpx.get(
             "https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/api/v1/stations/5cebf1e23d0f4a073c4bc0ad/data",
             params={
@@ -118,7 +118,16 @@ def _():
 
 
 @app.cell
-def _(date_range, selected_station):
+def _():
+    should_fetch_tides_btn = mo.ui.run_button(label="Click to continue and fetch the tide data")
+    should_fetch_tides_btn
+    return (should_fetch_tides_btn,)
+
+
+@app.cell
+def _(date_range, selected_station, should_fetch_tides_btn):
+    mo.stop(not should_fetch_tides_btn.value)
+
     with mo.redirect_stdout():
         print(f"Downloading data...")
 
@@ -137,7 +146,7 @@ def _(tide_data):
         pl.col("eventDate").str.to_datetime(format="%Y-%m-%dT%H:%M:%SZ").alias("time"),
         pl.col("value").alias("elevation")
     )
-    df
+    mo.ui.dataframe(df)
     return (df,)
 
 
@@ -187,7 +196,7 @@ def _():
 
 @app.cell
 def _(coef):
-    pd.DataFrame(
+    constituents_df = pd.DataFrame(
         {
             "constituent": coef.name,
             "amplitude": coef.A,
@@ -195,6 +204,8 @@ def _(coef):
             "snr": coef.A / coef.A_ci,  # signal-to-noise ratio
         }
     ).sort_values("amplitude", ascending=False)
+
+    mo.ui.dataframe(constituents_df)
     return
 
 
@@ -223,7 +234,16 @@ def _():
 
 
 @app.cell
-def _(selected_station, test_date_range):
+def _():
+    should_fetch_test_tides_btn = mo.ui.run_button(label="Click to continue and fetch the tide data")
+    should_fetch_test_tides_btn
+    return (should_fetch_test_tides_btn,)
+
+
+@app.cell
+def _(selected_station, should_fetch_test_tides_btn, test_date_range):
+    mo.stop(not should_fetch_test_tides_btn.value)
+
     with mo.redirect_stdout():
         print("Pulling test data...")
 
