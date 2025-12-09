@@ -1,10 +1,17 @@
 # /// script
-# dependencies = ["utide", "pyarrow"]
+# dependencies = [
+#     "utide",
+#     "pyarrow",
+#     "httpx==0.28.1",
+#     "pandas==2.3.3",
+#     "plotly==6.5.0",
+#     "polars==1.36.0",
+# ]
 # ///
 
 import marimo
 
-__generated_with = "0.18.3"
+__generated_with = "0.18.4"
 app = marimo.App(width="medium")
 
 with app.setup:
