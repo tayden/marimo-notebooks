@@ -15,7 +15,7 @@ __generated_with = "0.18.4"
 app = marimo.App(width="medium")
 
 with app.setup:
-    from datetime import datetime, date
+    from datetime import datetime, date, timedelta
     from itertools import pairwise
     from time import sleep
 
@@ -316,6 +316,42 @@ def _(reconstruction, test_elevation):
         print(f'RMSE: {rmse:.3f} m')
         print(f'MAE: {mae:.3f} m')
         print(f'R²: {r_squared:.3f}')
+    return
+
+
+@app.cell
+def _():
+    mo.md(r"""
+    ## But why?
+
+    CHS has pretty strict rate limits on their API. They'll only let you make 3 requests per second and 30 requests per minute. Furthermore, the more temporal resolution you request, the further they restrict the time periods you can request data for.
+
+    So, with this, we can request huge amounts of data on our own servers and it's relatively quick. The only thing to watch out for is running out of RAM since the utide library doesn't stream the results.
+    """)
+    return
+
+
+@app.cell
+def _(coef):
+    from time import perf_counter
+
+    # Now we can pull a lot more tide data quickly...
+    def dt_range(start: datetime, end: datetime, delta: timedelta):
+        cur = start
+        while cur <= end:
+            yield cur
+            cur += delta
+
+
+    start_time = perf_counter()
+
+    times_to_fetch = list(dt_range(datetime(2020,1,1), datetime(2025,1,1), timedelta(minutes=5)))
+    tides_five_minutes = utide.reconstruct(times_to_fetch, coef).h
+
+    elapsed_time = perf_counter() - start_time
+
+    with mo.redirect_stdout():
+        print(f"Fetched {len(tides_five_minutes)} tide values in {elapsed_time:.2f}s")
     return
 
 
