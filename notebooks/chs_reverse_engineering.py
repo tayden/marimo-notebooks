@@ -98,7 +98,7 @@ def get_tide_data(
     for from_, to_ in mo.status.progress_bar(list(pairwise(dates))):
         sleep(2)  # Have to go slow to not hit the CHS api limits...
         res = httpx.get(
-            "https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/api/v1/stations/5cebf1e23d0f4a073c4bc0ad/data",
+            f"https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/api/v1/stations/{station_id}/data",
             params={
                 "time-series-code": time_series_code,
                 "from": from_,
@@ -342,10 +342,9 @@ def _(coef):
             yield cur
             cur += delta
 
-
     start_time = perf_counter()
 
-    times_to_fetch = list(dt_range(datetime(2023,1,1), datetime(2025,1,1), timedelta(minutes=5)))
+    times_to_fetch = list(dt_range(datetime(2023, 1, 1), datetime(2025, 1, 1), timedelta(minutes=5)))
     tides_five_minutes = utide.reconstruct(times_to_fetch, coef).h
 
     elapsed_time = perf_counter() - start_time
