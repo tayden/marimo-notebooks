@@ -1,11 +1,11 @@
 # /// script
 # dependencies = [
-#     "utide",
-#     "pyarrow",
 #     "httpx==0.28.1",
+#     "numpy==2.3.5",
 #     "pandas==2.3.3",
 #     "plotly==6.5.0",
-#     "polars==1.36.0",
+#     "polars==1.36.1",
+#     "utide==0.3.1",
 # ]
 # ///
 
