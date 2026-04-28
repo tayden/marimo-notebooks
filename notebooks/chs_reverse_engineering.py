@@ -1,6 +1,8 @@
 # /// script
+# requires-python = ">=3.14"
 # dependencies = [
 #     "httpx==0.28.1",
+#     "marimo>=0.23.4",
 #     "numpy==2.3.5",
 #     "pandas==2.3.3",
 #     "plotly==6.5.0",
@@ -15,9 +17,9 @@ __generated_with = "0.18.4"
 app = marimo.App(width="medium")
 
 with app.setup:
+    import asyncio
     from datetime import datetime, date, timedelta
     from itertools import pairwise
-    from time import sleep
 
     import marimo as mo
     import httpx
@@ -38,13 +40,14 @@ def _():
 
 
 @app.function
-def get_stations(region_code: str = "PAC"):
-    stations = httpx.get(
-        "https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/api/v1/stations",
-        params={
-            "chs-region-code": region_code,
-        }
-    )
+async def get_stations(region_code: str = "PAC"):
+    async with httpx.AsyncClient() as client:
+        stations = await client.get(
+            "https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/api/v1/stations",
+            params={
+                "chs-region-code": region_code,
+            }
+        )
     if stations.is_success:
         return stations.json()
 
@@ -62,8 +65,8 @@ def _():
 
 
 @app.cell
-def _():
-    stations = get_stations()
+async def _():
+    stations = await get_stations()
     stations.sort(key=lambda s: s["officialName"])
 
     dropdown = mo.ui.dropdown(
@@ -84,7 +87,7 @@ def _(dropdown):
 
 
 @app.function
-def get_tide_data(
+async def get_tide_data(
         station_id: str,
         start_date: datetime | date,
         end_date: datetime | date,
@@ -95,18 +98,19 @@ def get_tide_data(
 
     result = []
 
-    for from_, to_ in mo.status.progress_bar(list(pairwise(dates))):
-        sleep(2)  # Have to go slow to not hit the CHS api limits...
-        res = httpx.get(
-            f"https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/api/v1/stations/{station_id}/data",
-            params={
-                "time-series-code": time_series_code,
-                "from": from_,
-                "to": to_,
-                "resolution": "FIFTEEN_MINUTES"
-            }
-        )
-        result.extend(res.json())
+    async with httpx.AsyncClient() as client:
+        for from_, to_ in mo.status.progress_bar(list(pairwise(dates))):
+            await asyncio.sleep(2)  # Have to go slow to not hit the CHS api limits...
+            res = await client.get(
+                f"https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/api/v1/stations/{station_id}/data",
+                params={
+                    "time-series-code": time_series_code,
+                    "from": from_,
+                    "to": to_,
+                    "resolution": "FIFTEEN_MINUTES"
+                }
+            )
+            result.extend(res.json())
 
     return result
 
@@ -127,13 +131,13 @@ def _():
 
 
 @app.cell
-def _(date_range, selected_station, should_fetch_tides_btn):
+async def _(date_range, selected_station, should_fetch_tides_btn):
     mo.stop(not should_fetch_tides_btn.value)
 
     with mo.redirect_stdout():
         print(f"Downloading data...")
 
-    tide_data = get_tide_data(
+    tide_data = await get_tide_data(
         selected_station["id"],
         date_range.value[0],
         date_range.value[1],
@@ -240,13 +244,13 @@ def _():
 
 
 @app.cell
-def _(selected_station, should_fetch_test_tides_btn, test_date_range):
+async def _(selected_station, should_fetch_test_tides_btn, test_date_range):
     mo.stop(not should_fetch_test_tides_btn.value)
 
     with mo.redirect_stdout():
         print("Pulling test data...")
 
-    test_tide_data = get_tide_data(
+    test_tide_data = await get_tide_data(
         selected_station["id"],
         test_date_range.value[0],
         test_date_range.value[1],
