@@ -1,7 +1,8 @@
 # /// script
 # requires-python = ">=3.14"
 # dependencies = [
-#     "httpx==0.28.1",
+#     "aiodns==4.0.0",
+#     "aiohttp==3.13.5",
 #     "marimo>=0.23.4",
 #     "numpy==2.3.5",
 #     "pandas==2.3.3",
@@ -13,7 +14,7 @@
 
 import marimo
 
-__generated_with = "0.18.4"
+__generated_with = "0.23.4"
 app = marimo.App(width="medium")
 
 with app.setup:
@@ -22,7 +23,7 @@ with app.setup:
     from itertools import pairwise
 
     import marimo as mo
-    import httpx
+    import aiohttp
     import utide
     import numpy as np
     import polars as pl
@@ -41,17 +42,15 @@ def _():
 
 @app.function
 async def get_stations(region_code: str = "PAC"):
-    async with httpx.AsyncClient() as client:
-        stations = await client.get(
-            "https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/api/v1/stations",
+    async with aiohttp.ClientSession() as session:
+        async with session.get("https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/api/v1/stations",
             params={
                 "chs-region-code": region_code,
             }
-        )
-    if stations.is_success:
-        return stations.json()
-
-    raise ValueError("Something went wrong")
+        ) as response:
+            if response.ok:
+                return await response.json()
+            raise RuntimeError("Could not fetch stations")
 
 
 @app.cell(hide_code=True)
@@ -98,19 +97,22 @@ async def get_tide_data(
 
     result = []
 
-    async with httpx.AsyncClient() as client:
+    async with aiohttp.ClientSession() as session:
         for from_, to_ in mo.status.progress_bar(list(pairwise(dates))):
             await asyncio.sleep(2)  # Have to go slow to not hit the CHS api limits...
-            res = await client.get(
-                f"https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/api/v1/stations/{station_id}/data",
+            async with session.get(f"https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/api/v1/stations/{station_id}/data",
                 params={
                     "time-series-code": time_series_code,
                     "from": from_,
                     "to": to_,
                     "resolution": "FIFTEEN_MINUTES"
                 }
-            )
-            result.extend(res.json())
+            ) as response:
+                if response.ok:
+                    d = await response.json()
+                    result.extend(d)
+                else:
+                    raise RuntimeError(f"Could not fetch station {station_id} for dates {from_} -> {to_}")
 
     return result
 
