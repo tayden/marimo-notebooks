@@ -46,7 +46,7 @@ def _():
 
 @app.function
 async def get_stations(region_code: str = "PAC"):
-    url = f"https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/api/v1/stations?{urlencode({'chs-region-code': region_code})}"
+    url = f"https://api-sine.dfo-mpo.gc.ca/api/v1/stations?{urlencode({'chs-region-code': region_code})}"
     loop = asyncio.get_event_loop()
 
     def _fetch():
@@ -105,7 +105,7 @@ async def get_tide_data(
     for from_, to_ in mo.status.progress_bar(list(pairwise(dates))):
         await asyncio.sleep(2)  # CHS rate limit: ~3 req/s, 30 req/min
         url = (
-            f"https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/api/v1/stations/{station_id}/data"
+            f"https://api-sine.dfo-mpo.gc.ca/api/v1/stations/{station_id}/data"
             f"?{urlencode({'time-series-code': time_series_code, 'from': from_, 'to': to_, 'resolution': 'FIFTEEN_MINUTES'})}"
         )
 
