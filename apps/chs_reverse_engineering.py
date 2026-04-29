@@ -413,9 +413,9 @@ def _():
     mo.md(r"""
     ## Step 5 — Generate Predictions at Scale
 
-    Here's the payoff. CHS's prediction API imposes strict rate limits (3 req/s, 30 req/min) and restricts the time window per request at higher resolutions. Fetching years of fine-resolution predictions directly from the API is slow and often impractical.
+    The CHS prediction API has strict rate limits (3 req/s, 30 req/min) and caps the time window per request at higher resolutions, so fetching years of fine-resolution data directly is slow and cumbersome.
 
-    With a fitted harmonic model, `utide.reconstruct` generates predictions entirely in Python — no network calls, no rate limits. The computation is simple matrix arithmetic over the constituent parameters. Two years of 5-minute predictions (~210,000 values) runs in under a second:
+    With a fitted model, `utide.reconstruct` generates predictions entirely locally — just matrix arithmetic over the constituent parameters. Two years of 5-minute predictions (~210,000 values) runs in under a second:
     """)
     return
 
