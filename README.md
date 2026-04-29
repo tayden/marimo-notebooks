@@ -1,68 +1,55 @@
-# marimo WebAssembly + GitHub Pages Template
+# marimo Notebooks
 
-This template repository demonstrates how to export [marimo](https://marimo.io) notebooks to WebAssembly and deploy them to GitHub Pages.
+Interactive data science notebooks built with [marimo](https://marimo.io), deployed to GitHub Pages as WebAssembly apps.
 
-## 📚 Included Examples
+**Live site: [tayden.github.io/marimo-notebooks](https://tayden.github.io/marimo-notebooks/)**
 
-- `apps/charts.py`: Interactive data visualization with Altair
-- `notebooks/fibonacci.py`: Interactive Fibonacci sequence calculator
-- `notebooks/penguins.py`: Interactive data analysis with Polars and marimo
+## Notebooks
 
-## 🚀 Usage
+### Apps (`apps/` — read-only, interactive)
 
-1. Fork this repository
-2. Add your marimo files to the `notebooks/` or `apps/` directory
-   1. `notebooks/` notebooks are exported with `--mode edit`
-   2. `apps/` notebooks are exported with `--mode run`
-3. Push to main branch
-4. Go to repository **Settings > Pages** and change the "Source" dropdown to "GitHub Actions"
-5. GitHub Actions will automatically build and deploy to Pages
+- `apps/chs_reverse_engineering.py`: Tidal analysis and prediction using CHS water level data, with harmonic decomposition via utide
+- `apps/icefield_projector_calibration_explainer.py`: Interactive explainer for the pinhole camera model and projector calibration system used in the Icefield Projector
 
-## Including data or assets
+### Notebooks (`notebooks/` — editable)
 
-To include data or assets in your notebooks, add them to the `public/` directory.
+- `notebooks/pruth-tides.py`: Tidal analysis for the Pruth Bay area using historical water level data (2018–2025)
 
-For example, the `apps/charts.py` notebook loads an image asset from the `public/` directory.
+## Local development
 
-```markdown
-<img src="public/logo.png" width="200" />
-```
-
-And the `notebooks/penguins.py` notebook loads a CSV dataset from the `public/` directory.
-
-```python
-import polars as pl
-df = pl.read_csv(mo.notebook_location() / "public" / "penguins.csv")
-```
-
-## 🎨 Templates
-
-This repository includes several templates for the generated site:
-
-1. `index.html.j2` (default): A template with styling and a footer
-2. `bare.html.j2`: A minimal template with basic styling
-3. `tailwind.html.j2`: A minimal and lean template using Tailwind CSS
-
-To use a specific template, pass the `--template` parameter to the build script:
+Run a notebook locally:
 
 ```bash
-uv run .github/scripts/build.py --template templates/tailwind.html.j2
+uv run marimo edit notebooks/pruth-tides.py
 ```
 
-You can also create your own custom templates. See the [templates/README.md](templates/README.md) for more information.
-
-## 🧪 Testing
-
-To test the export process, run `.github/scripts/build.py` from the root directory.
+Build the static site:
 
 ```bash
 uv run .github/scripts/build.py
 ```
 
-This will export all notebooks in a folder called `_site/` in the root directory. Then to serve the site, run:
+Serve the built site:
 
 ```bash
 python -m http.server -d _site
 ```
 
-This will serve the site at `http://localhost:8000`.
+## Deployment
+
+Pushing to `main` triggers a GitHub Actions workflow that exports all notebooks to WebAssembly and deploys to GitHub Pages. No manual steps required.
+
+To add a new notebook:
+
+1. Drop a `.py` marimo file into `notebooks/` (editable mode) or `apps/` (read-only mode)
+2. Add any data or assets to the corresponding `public/` subdirectory
+3. Push to `main`
+
+## Including data or assets
+
+Place data files alongside notebooks in a `public/` subdirectory:
+
+```python
+import polars as pl
+df = pl.read_csv(mo.notebook_location() / "public" / "data.csv")
+```
