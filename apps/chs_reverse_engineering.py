@@ -1,7 +1,6 @@
 # /// script
 # requires-python = ">=3.14"
 # dependencies = [
-#     "aiodns==4.0.0",
 #     "aiohttp==3.13.5",
 #     "marimo>=0.23.4",
 #     "numpy==2.3.5",
