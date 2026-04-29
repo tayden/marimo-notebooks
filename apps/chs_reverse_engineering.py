@@ -47,7 +47,7 @@ def _():
 async def get_stations(region_code: str = "PAC"):
     async with aiohttp.ClientSession() as session:
         async with session.get(
-            "https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/api/v1/stations",
+            "https://api-sine.dfo-mpo.gc.ca/api/v1/stations",
             params={"chs-region-code": region_code},
         ) as response:
             if response.ok:
@@ -103,7 +103,7 @@ async def get_tide_data(
         for from_, to_ in mo.status.progress_bar(list(pairwise(dates))):
             await asyncio.sleep(2)  # CHS rate limit: ~3 req/s, 30 req/min
             async with session.get(
-                f"https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/api/v1/stations/{station_id}/data",
+                f"https://api-sine.dfo-mpo.gc.ca/api/v1/stations/{station_id}/data",
                 params={
                     "time-series-code": time_series_code,
                     "from": from_,
