@@ -1,7 +1,6 @@
 # /// script
 # requires-python = ">=3.14"
 # dependencies = [
-#     "aiohttp==3.13.5",
 #     "marimo>=0.23.4",
 #     "numpy==2.3.5",
 #     "pandas==2.3.3",
@@ -18,11 +17,13 @@ app = marimo.App(width="medium")
 
 with app.setup:
     import asyncio
+    import json
+    import urllib.request
     from datetime import datetime, date, timedelta
     from itertools import pairwise
+    from urllib.parse import urlencode
 
     import marimo as mo
-    import aiohttp
     import utide
     import numpy as np
     import polars as pl
@@ -45,14 +46,14 @@ def _():
 
 @app.function
 async def get_stations(region_code: str = "PAC"):
-    async with aiohttp.ClientSession() as session:
-        async with session.get(
-            "https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/api/v1/stations",
-            params={"chs-region-code": region_code},
-        ) as response:
-            if response.ok:
-                return await response.json()
-            raise RuntimeError("Could not fetch stations")
+    url = f"https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/api/v1/stations?{urlencode({'chs-region-code': region_code})}"
+    loop = asyncio.get_event_loop()
+
+    def _fetch():
+        with urllib.request.urlopen(url) as r:
+            return json.loads(r.read())
+
+    return await loop.run_in_executor(None, _fetch)
 
 
 @app.cell(hide_code=True)
@@ -99,23 +100,20 @@ async def get_tide_data(
 
     result = []
 
-    async with aiohttp.ClientSession() as session:
-        for from_, to_ in mo.status.progress_bar(list(pairwise(dates))):
-            await asyncio.sleep(2)  # CHS rate limit: ~3 req/s, 30 req/min
-            async with session.get(
-                f"https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/api/v1/stations/{station_id}/data",
-                params={
-                    "time-series-code": time_series_code,
-                    "from": from_,
-                    "to": to_,
-                    "resolution": "FIFTEEN_MINUTES",
-                },
-            ) as response:
-                if response.ok:
-                    d = await response.json()
-                    result.extend(d)
-                else:
-                    raise RuntimeError(f"Could not fetch station {station_id} for dates {from_} -> {to_}")
+    loop = asyncio.get_event_loop()
+
+    for from_, to_ in mo.status.progress_bar(list(pairwise(dates))):
+        await asyncio.sleep(2)  # CHS rate limit: ~3 req/s, 30 req/min
+        url = (
+            f"https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/api/v1/stations/{station_id}/data"
+            f"?{urlencode({'time-series-code': time_series_code, 'from': from_, 'to': to_, 'resolution': 'FIFTEEN_MINUTES'})}"
+        )
+
+        def _fetch(u=url):
+            with urllib.request.urlopen(u) as r:
+                return json.loads(r.read())
+
+        result.extend(await loop.run_in_executor(None, _fetch))
 
     return result
 
@@ -308,7 +306,7 @@ def _():
 def _():
     test_date_range = mo.ui.date_range(
         label="Validation data range",
-        value=(date(2020, 1, 1), date(2020, 6, 1)),
+        value=(date(2026, 1, 1), date(2026, 4, 29)),
     )
     test_date_range
     return (test_date_range,)
