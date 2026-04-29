@@ -89,12 +89,12 @@ def _(dropdown):
 
 @app.function
 async def get_tide_data(
-        station_id: str,
-        start_date: datetime | date,
-        end_date: datetime | date,
-        time_series_code: str = "wlp",
+    station_id: str,
+    start_date: datetime | date,
+    end_date: datetime | date,
+    time_series_code: str = "wlp",
 ):
-    date_range = pd.date_range(start=start_date, end=end_date, freq='MS')
+    date_range = pd.date_range(start=start_date, end=end_date, freq="MS")
     dates = [d.strftime("%Y-%m-%dT%H:%M:%SZ") for d in date_range]
 
     result = []
@@ -115,7 +115,9 @@ async def get_tide_data(
                     d = await response.json()
                     result.extend(d)
                 else:
-                    raise RuntimeError(f"Could not fetch station {station_id} for dates {from_} -> {to_}")
+                    raise RuntimeError(
+                        f"Could not fetch station {station_id} for dates {from_} -> {to_}"
+                    )
 
     return result
 
@@ -177,13 +179,15 @@ def _(tide_data):
 @app.cell(hide_code=True)
 def _(df):
     fig_raw = go.Figure()
-    fig_raw.add_trace(go.Scatter(
-        x=df["time"].to_numpy(),
-        y=df["elevation"].to_numpy(),
-        mode="lines",
-        line=dict(width=0.6, color="steelblue"),
-        name="observed",
-    ))
+    fig_raw.add_trace(
+        go.Scatter(
+            x=df["time"].to_numpy(),
+            y=df["elevation"].to_numpy(),
+            mode="lines",
+            line=dict(width=0.6, color="steelblue"),
+            name="observed",
+        )
+    )
     fig_raw.update_layout(
         title="Observed Water Levels — Training Data",
         xaxis_title="Time",
@@ -268,13 +272,17 @@ def _(coef):
 
     top_n = constituents_df.head(15)
 
-    fig_constituents = go.Figure(go.Bar(
-        x=top_n["constituent"],
-        y=top_n["amplitude"],
-        text=[f"SNR {v:.1f}" for v in top_n["snr"]],
-        textposition="outside",
-        marker_color=["steelblue" if snr >= 2 else "#c8d6e0" for snr in top_n["snr"]],
-    ))
+    fig_constituents = go.Figure(
+        go.Bar(
+            x=top_n["constituent"],
+            y=top_n["amplitude"],
+            text=[f"SNR {v:.1f}" for v in top_n["snr"]],
+            textposition="outside",
+            marker_color=[
+                "steelblue" if snr >= 2 else "#c8d6e0" for snr in top_n["snr"]
+            ],
+        )
+    )
     fig_constituents.update_layout(
         title="Top 15 Tidal Constituents by Amplitude",
         xaxis_title="Constituent",
@@ -354,30 +362,54 @@ def _(coef, test_elevation, test_time):
     residuals = test_elevation - reconstruction.h
 
     fig = make_subplots(
-        rows=2, cols=1,
+        rows=2,
+        cols=1,
         shared_xaxes=True,
         vertical_spacing=0.08,
         subplot_titles=("Observed vs Model", "Residuals (non-tidal signal)"),
     )
 
     fig.add_trace(
-        go.Scatter(x=test_time, y=test_elevation, name="observed", opacity=0.7, line=dict(width=0.8)),
-        row=1, col=1,
+        go.Scatter(
+            x=test_time,
+            y=test_elevation,
+            name="observed",
+            opacity=0.7,
+            line=dict(width=0.8),
+        ),
+        row=1,
+        col=1,
     )
     fig.add_trace(
-        go.Scatter(x=test_time, y=reconstruction.h, name="model", opacity=0.85, line=dict(width=1.2)),
-        row=1, col=1,
+        go.Scatter(
+            x=test_time,
+            y=reconstruction.h,
+            name="model",
+            opacity=0.85,
+            line=dict(width=1.2),
+        ),
+        row=1,
+        col=1,
     )
     fig.add_trace(
-        go.Scatter(x=test_time, y=residuals, name="residual", showlegend=False, line=dict(width=0.7, color="grey")),
-        row=2, col=1,
+        go.Scatter(
+            x=test_time,
+            y=residuals,
+            name="residual",
+            showlegend=False,
+            line=dict(width=0.7, color="grey"),
+        ),
+        row=2,
+        col=1,
     )
     fig.add_hline(y=0, line_dash="dash", line_color="black", opacity=0.3, row=2, col=1)
 
     fig.update_yaxes(title_text="elevation (m)", row=1, col=1)
     fig.update_yaxes(title_text="residual (m)", row=2, col=1)
     fig.update_xaxes(title_text="time", row=2, col=1)
-    fig.update_layout(height=520, legend=dict(orientation="h", yanchor="bottom", y=1.02))
+    fig.update_layout(
+        height=520, legend=dict(orientation="h", yanchor="bottom", y=1.02)
+    )
 
     fig
     return (reconstruction,)
@@ -386,9 +418,9 @@ def _(coef, test_elevation, test_time):
 @app.cell(hide_code=True)
 def _(reconstruction, test_elevation):
     residuals_v = test_elevation - reconstruction.h
-    rmse = np.sqrt(np.mean(residuals_v ** 2))
+    rmse = np.sqrt(np.mean(residuals_v**2))
     mae = np.mean(np.abs(residuals_v))
-    ss_res = np.sum(residuals_v ** 2)
+    ss_res = np.sum(residuals_v**2)
     ss_tot = np.sum((test_elevation - np.mean(test_elevation)) ** 2)
     r_squared = 1 - ss_res / ss_tot
 
@@ -433,7 +465,9 @@ def _(coef):
             cur += delta
 
     t0 = perf_counter()
-    times_to_fetch = list(dt_range(datetime(2023, 1, 1), datetime(2025, 1, 1), timedelta(minutes=5)))
+    times_to_fetch = list(
+        dt_range(datetime(2023, 1, 1), datetime(2025, 1, 1), timedelta(minutes=5))
+    )
     tides_five_minutes = utide.reconstruct(times_to_fetch, coef).h
     elapsed = perf_counter() - t0
 

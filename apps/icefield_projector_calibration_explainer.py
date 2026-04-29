@@ -94,8 +94,12 @@ def _(mo):
 @app.cell
 def _(mo):
     throw_ratio_s = mo.ui.slider(0.30, 1.50, step=0.05, value=0.58, label="Throw ratio")
-    lens_shift_v_s = mo.ui.slider(-0.40, 0.40, step=0.05, value=0.00, label="Lens shift — vertical")
-    lens_shift_h_s = mo.ui.slider(-0.40, 0.40, step=0.05, value=0.00, label="Lens shift — horizontal")
+    lens_shift_v_s = mo.ui.slider(
+        -0.40, 0.40, step=0.05, value=0.00, label="Lens shift — vertical"
+    )
+    lens_shift_h_s = mo.ui.slider(
+        -0.40, 0.40, step=0.05, value=0.00, label="Lens shift — horizontal"
+    )
     return lens_shift_h_s, lens_shift_v_s, throw_ratio_s
 
 
@@ -110,13 +114,15 @@ def _(H, W, lens_shift_h_s, lens_shift_v_s, mo, np, plt, throw_ratio_s):
     cy1 = H / 2 - lsv * H
     hfov_deg1 = np.degrees(2 * np.arctan(1 / (2 * tr)))
 
-    corners1 = np.array([
-        [-500.0, -500.0 * H / W, 1000.0],
-        [ 500.0, -500.0 * H / W, 1000.0],
-        [ 500.0,  500.0 * H / W, 1000.0],
-        [-500.0,  500.0 * H / W, 1000.0],
-        [-500.0, -500.0 * H / W, 1000.0],
-    ])
+    corners1 = np.array(
+        [
+            [-500.0, -500.0 * H / W, 1000.0],
+            [500.0, -500.0 * H / W, 1000.0],
+            [500.0, 500.0 * H / W, 1000.0],
+            [-500.0, 500.0 * H / W, 1000.0],
+            [-500.0, -500.0 * H / W, 1000.0],
+        ]
+    )
     u1 = fx1 * corners1[:, 0] / corners1[:, 2] + cx1
     v1 = fx1 * corners1[:, 1] / corners1[:, 2] + cy1
 
@@ -125,7 +131,9 @@ def _(H, W, lens_shift_h_s, lens_shift_v_s, mo, np, plt, throw_ratio_s):
     ax1.set_facecolor("#111")
     ax1.add_patch(plt.Rectangle((0, 0), W, H, fill=False, edgecolor="cyan", lw=1.5))
     ax1.plot(u1, v1, "w-", lw=2, label="Projected scene boundary")
-    ax1.plot(cx1, cy1, "r+", ms=14, mew=2.5, label=f"Principal point ({cx1:.0f}, {cy1:.0f})")
+    ax1.plot(
+        cx1, cy1, "r+", ms=14, mew=2.5, label=f"Principal point ({cx1:.0f}, {cy1:.0f})"
+    )
     ax1.axvline(W / 2, color="gray", ls="--", lw=0.8, alpha=0.4)
     ax1.axhline(H / 2, color="gray", ls="--", lw=0.8, alpha=0.4)
     ax1.set_xlim(-20, W + 20)
@@ -135,7 +143,8 @@ def _(H, W, lens_shift_h_s, lens_shift_v_s, mo, np, plt, throw_ratio_s):
     ax1.tick_params(colors="white")
     ax1.set_title(
         f"throw_ratio={tr:.2f}  →  hfov={hfov_deg1:.1f}°  |  fx={fx1:.0f} px",
-        color="white", fontsize=10,
+        color="white",
+        fontsize=10,
     )
     ax1.legend(facecolor="#333", labelcolor="white", fontsize=9)
     plt.tight_layout()
@@ -152,11 +161,13 @@ def _(H, W, lens_shift_h_s, lens_shift_v_s, mo, np, plt, throw_ratio_s):
 
 @app.cell
 def _(fig1, info1, lens_shift_h_s, lens_shift_v_s, mo, throw_ratio_s):
-    mo.vstack([
-        mo.vstack([throw_ratio_s, lens_shift_v_s, lens_shift_h_s]),
-        fig1,
-        info1,
-    ])
+    mo.vstack(
+        [
+            mo.vstack([throw_ratio_s, lens_shift_v_s, lens_shift_h_s]),
+            fig1,
+            info1,
+        ]
+    )
     return
 
 
@@ -200,7 +211,9 @@ def _(mo):
 def _(mo):
     cam_dx_s = mo.ui.slider(-80, 80, step=5, value=0, label="Camera X offset (mm)")
     cam_dy_s = mo.ui.slider(-80, 80, step=5, value=0, label="Camera Y offset (mm)")
-    cam_dz_s = mo.ui.slider(-150, 150, step=10, value=0, label="Camera height offset (mm)")
+    cam_dz_s = mo.ui.slider(
+        -150, 150, step=10, value=0, label="Camera height offset (mm)"
+    )
     cam_yaw_s = mo.ui.slider(-25, 25, step=1, value=0, label="Yaw (°)")
     cam_pitch_s = mo.ui.slider(-20, 20, step=1, value=0, label="Pitch (°)")
     return cam_dx_s, cam_dy_s, cam_dz_s, cam_pitch_s, cam_yaw_s
@@ -215,7 +228,9 @@ def _(H, W, cam_dx_s, cam_dy_s, cam_dz_s, cam_pitch_s, cam_yaw_s, np, plt, tr):
     pts2 = np.stack([GX2.ravel(), GY2.ravel(), GZ2.ravel()], axis=1)
 
     base_pos2 = np.array([100.0, -20.0, 380.0])
-    pos2 = base_pos2 + np.array([cam_dx_s.value, cam_dy_s.value, cam_dz_s.value], dtype=float)
+    pos2 = base_pos2 + np.array(
+        [cam_dx_s.value, cam_dy_s.value, cam_dz_s.value], dtype=float
+    )
 
     yaw_r2 = np.radians(cam_yaw_s.value)
     pitch_r2 = np.radians(cam_pitch_s.value)
@@ -226,21 +241,27 @@ def _(H, W, cam_dx_s, cam_dy_s, cam_dz_s, cam_pitch_s, cam_yaw_s, np, plt, tr):
     fwd2 /= np.linalg.norm(fwd2)
     up_v2 = np.array([0.0, 1.0, 0.0])
 
-    Ryaw2 = np.array([
-        [np.cos(yaw_r2), -np.sin(yaw_r2), 0],
-        [np.sin(yaw_r2),  np.cos(yaw_r2), 0],
-        [0, 0, 1],
-    ])
+    Ryaw2 = np.array(
+        [
+            [np.cos(yaw_r2), -np.sin(yaw_r2), 0],
+            [np.sin(yaw_r2), np.cos(yaw_r2), 0],
+            [0, 0, 1],
+        ]
+    )
     fwd2 = Ryaw2 @ fwd2
 
-    right2 = np.cross(fwd2, up_v2); right2 /= np.linalg.norm(right2)
+    right2 = np.cross(fwd2, up_v2)
+    right2 /= np.linalg.norm(right2)
     c_p2, s_p2 = np.cos(pitch_r2), np.sin(pitch_r2)
-    Rpitch2 = (c_p2 * np.eye(3)
-               + s_p2 * np.cross(right2, np.eye(3))
-               + (1 - c_p2) * np.outer(right2, right2))
+    Rpitch2 = (
+        c_p2 * np.eye(3)
+        + s_p2 * np.cross(right2, np.eye(3))
+        + (1 - c_p2) * np.outer(right2, right2)
+    )
     fwd2 = Rpitch2 @ fwd2 / np.linalg.norm(Rpitch2 @ fwd2)
 
-    right2 = np.cross(fwd2, up_v2); right2 /= np.linalg.norm(right2)
+    right2 = np.cross(fwd2, up_v2)
+    right2 /= np.linalg.norm(right2)
     up_t2 = np.cross(right2, fwd2)
     R2 = np.array([right2, -up_t2, fwd2])
     t_vec2 = -R2 @ pos2
@@ -252,29 +273,46 @@ def _(H, W, cam_dx_s, cam_dy_s, cam_dz_s, cam_pitch_s, cam_yaw_s, np, plt, tr):
     v2 = np.where(valid2, fx2 * pts_cam2[:, 1] / pts_cam2[:, 2] + H / 2, np.nan)
 
     fdepth2 = 150.0
-    frust_norm2 = np.array([
-        [-1 / tr, -1 / tr * H / W, 1],
-        [ 1 / tr, -1 / tr * H / W, 1],
-        [ 1 / tr,  1 / tr * H / W, 1],
-        [-1 / tr,  1 / tr * H / W, 1],
-    ])
+    frust_norm2 = np.array(
+        [
+            [-1 / tr, -1 / tr * H / W, 1],
+            [1 / tr, -1 / tr * H / W, 1],
+            [1 / tr, 1 / tr * H / W, 1],
+            [-1 / tr, 1 / tr * H / W, 1],
+        ]
+    )
     frust_world2 = (R2.T @ (fdepth2 * frust_norm2.T - t_vec2[:, None])).T
 
     fig2 = plt.figure(figsize=(11, 4.5))
     fig2.patch.set_facecolor("#1a1a2e")
 
     ax2_3d = fig2.add_subplot(1, 2, 1, projection="3d")
-    ax2_3d.scatter(GX2.ravel(), GY2.ravel(), GZ2.ravel(),
-                   c=GZ2.ravel(), cmap="terrain", s=12, alpha=0.7)
+    ax2_3d.scatter(
+        GX2.ravel(),
+        GY2.ravel(),
+        GZ2.ravel(),
+        c=GZ2.ravel(),
+        cmap="terrain",
+        s=12,
+        alpha=0.7,
+    )
     ax2_3d.scatter(*pos2, color="red", s=60, zorder=5, label="Projector")
     for fc2 in frust_world2:
-        ax2_3d.plot([pos2[0], fc2[0]], [pos2[1], fc2[1]], [pos2[2], fc2[2]],
-                    "r-", alpha=0.5, lw=1)
+        ax2_3d.plot(
+            [pos2[0], fc2[0]],
+            [pos2[1], fc2[1]],
+            [pos2[2], fc2[2]],
+            "r-",
+            alpha=0.5,
+            lw=1,
+        )
     # Sync X and Y axis ranges so the 3D view doesn't jump or clip as sliders move
     _all_x2 = np.concatenate([GX2.ravel(), [pos2[0]], frust_world2[:, 0]])
     _all_y2 = np.concatenate([GY2.ravel(), [pos2[1]], frust_world2[:, 1]])
     _all_z2 = np.concatenate([GZ2.ravel(), [pos2[2]], frust_world2[:, 2]])
-    _xy_half = max(_all_x2.max() - _all_x2.min(), _all_y2.max() - _all_y2.min()) / 2 * 1.3
+    _xy_half = (
+        max(_all_x2.max() - _all_x2.min(), _all_y2.max() - _all_y2.min()) / 2 * 1.3
+    )
     _x_mid2 = (_all_x2.max() + _all_x2.min()) / 2
     _y_mid2 = (_all_y2.max() + _all_y2.min()) / 2
     _z_pad2 = (_all_z2.max() - _all_z2.min()) * 0.1
@@ -289,9 +327,12 @@ def _(H, W, cam_dx_s, cam_dy_s, cam_dz_s, cam_pitch_s, cam_yaw_s, np, plt, tr):
 
     ax2_2d = fig2.add_subplot(1, 2, 2)
     ax2_2d.set_facecolor("#111")
-    ax2_2d.scatter(u2[valid2], v2[valid2], c=GZ2.ravel()[valid2], cmap="terrain", s=25, zorder=3)
+    ax2_2d.scatter(
+        u2[valid2], v2[valid2], c=GZ2.ravel()[valid2], cmap="terrain", s=25, zorder=3
+    )
     ax2_2d.add_patch(plt.Rectangle((0, 0), W, H, fill=False, edgecolor="cyan", lw=1.5))
-    ax2_2d.set_xlim(0, W); ax2_2d.set_ylim(H, 0)
+    ax2_2d.set_xlim(0, W)
+    ax2_2d.set_ylim(H, 0)
     ax2_2d.set_xlabel("Pixel x", color="white")
     ax2_2d.set_ylabel("Pixel y", color="white")
     ax2_2d.tick_params(colors="white")
@@ -302,10 +343,12 @@ def _(H, W, cam_dx_s, cam_dy_s, cam_dz_s, cam_pitch_s, cam_yaw_s, np, plt, tr):
 
 @app.cell
 def _(cam_dx_s, cam_dy_s, cam_dz_s, cam_pitch_s, cam_yaw_s, fig2, mo):
-    mo.vstack([
-        mo.vstack([cam_dx_s, cam_dy_s, cam_dz_s, cam_yaw_s, cam_pitch_s]),
-        fig2,
-    ])
+    mo.vstack(
+        [
+            mo.vstack([cam_dx_s, cam_dy_s, cam_dz_s, cam_yaw_s, cam_pitch_s]),
+            fig2,
+        ]
+    )
     return
 
 
@@ -339,7 +382,9 @@ def _(mo):
 @app.cell
 def _(mo):
     k1_s = mo.ui.slider(-0.50, 0.50, step=0.02, value=0.00, label="k1 (primary radial)")
-    k2_s = mo.ui.slider(-0.10, 0.10, step=0.005, value=0.00, label="k2 (secondary radial)")
+    k2_s = mo.ui.slider(
+        -0.10, 0.10, step=0.005, value=0.00, label="k2 (secondary radial)"
+    )
     return k1_s, k2_s
 
 
@@ -365,7 +410,8 @@ def _(k1_s, k2_s, np, plt):
     ]:
         ax3.set_facecolor("#111")
         ax3.set_aspect("equal")
-        ax3.set_xlim(-1.3, 1.3); ax3.set_ylim(-1.3, 1.3)
+        ax3.set_xlim(-1.3, 1.3)
+        ax3.set_ylim(-1.3, 1.3)
         ax3.tick_params(colors="white")
         ax3.set_title(title3, color="white", fontsize=10)
         for yc3 in grid_lines3:
@@ -434,10 +480,12 @@ def _(mo, np, plt, z_exag_s):
     geo_y4 = np.linspace(0, 5000.0, 40)
     GX4, GY4 = np.meshgrid(geo_x4, geo_y4)
 
-    geo_z4 = (1400
-              + 100 * np.exp(-((GX4 - 2500)**2 + (GY4 - 2000)**2) / 1_200_000)
-              + 60 * np.sin(GX4 / 1000) * np.cos(GY4 / 1200)
-              + 18 * rng4.standard_normal((40, 40)))
+    geo_z4 = (
+        1400
+        + 100 * np.exp(-((GX4 - 2500) ** 2 + (GY4 - 2000) ** 2) / 1_200_000)
+        + 60 * np.sin(GX4 / 1000) * np.cos(GY4 / 1200)
+        + 18 * rng4.standard_normal((40, 40))
+    )
     geo_z_min4 = float(geo_z4.min())
     geo_z_range4 = float(geo_z4.max() - geo_z_min4)
 
@@ -464,11 +512,19 @@ def _(mo, np, plt, z_exag_s):
     ax4b.set_facecolor("#111")
     ax4b.plot(stl_x_cross4, stl_cross4, color="orange", lw=1.5)
     ax4b.fill_between(stl_x_cross4, 0, stl_cross4, alpha=0.25, color="orange")
-    ax4b.axhline(model_d4, color="gray", ls="--", lw=0.8, alpha=0.6,
-                 label=f"Nominal model top ({model_d4} mm)")
+    ax4b.axhline(
+        model_d4,
+        color="gray",
+        ls="--",
+        lw=0.8,
+        alpha=0.6,
+        label=f"Nominal model top ({model_d4} mm)",
+    )
     ax4b.set_xlabel("Model X (mm)", color="white")
     ax4b.set_ylabel("Model Z (mm)", color="white")
-    ax4b.set_title(f"Model cross-section  (z_exag = {z_ex:.2f}×)", color="white", fontsize=9)
+    ax4b.set_title(
+        f"Model cross-section  (z_exag = {z_ex:.2f}×)", color="white", fontsize=9
+    )
     ax4b.tick_params(colors="white")
     ax4b.set_ylim(0, max(model_d4 * 7, stl_cross4.max() * 1.25))
     ax4b.legend(facecolor="#333", labelcolor="white", fontsize=8)
@@ -532,7 +588,9 @@ def _(mo):
 
 @app.cell
 def _(mo):
-    perturb_s = mo.ui.slider(0.0, 1.0, step=0.05, value=0.3, label="Pose perturbation magnitude")
+    perturb_s = mo.ui.slider(
+        0.0, 1.0, step=0.05, value=0.3, label="Pose perturbation magnitude"
+    )
     return (perturb_s,)
 
 
@@ -547,7 +605,8 @@ def _(H, W, least_squares, np, perturb_s, plt, tr):
 
     def _view5(pos, fwd, up_v):
         fwd = fwd / np.linalg.norm(fwd)
-        r5 = np.cross(fwd, up_v); r5 /= np.linalg.norm(r5)
+        r5 = np.cross(fwd, up_v)
+        r5 /= np.linalg.norm(r5)
         u5 = np.cross(r5, fwd)
         R5 = np.array([r5, -u5, fwd])
         return R5, -R5 @ pos
@@ -561,11 +620,19 @@ def _(H, W, least_squares, np, perturb_s, plt, tr):
         pv = np.where(ok5, f5 * cam5[:, 1] / cam5[:, 2] + H / 2, np.nan)
         return pu, pv
 
-    gcp5 = np.array([
-        [20,  20,  0], [100,  20, 0], [180,  20, 0],
-        [20, 100,  5], [180, 100, 5],
-        [20, 180,  0], [100, 180, 0], [180, 180, 0],
-    ], dtype=float)
+    gcp5 = np.array(
+        [
+            [20, 20, 0],
+            [100, 20, 0],
+            [180, 20, 0],
+            [20, 100, 5],
+            [180, 100, 5],
+            [20, 180, 0],
+            [100, 180, 0],
+            [180, 180, 0],
+        ],
+        dtype=float,
+    )
 
     u5_gt, v5_gt = _project5(gcp5, gt_pos5, gt_fwd5, gt_up5, gt_tr5)
     obs5 = np.stack([u5_gt, v5_gt], axis=1) + rng5.normal(0, 2.0, (len(gcp5), 2))
@@ -584,7 +651,9 @@ def _(H, W, least_squares, np, perturb_s, plt, tr):
     pert_fwd5 = gt_fwd5
 
     u5_pert, v5_pert = _project5(gcp5, pert_pos5, pert_fwd5, gt_up5, pert_tr5)
-    err_pert = float(np.nanmean(np.sqrt((u5_pert - obs5[:, 0])**2 + (v5_pert - obs5[:, 1])**2)))
+    err_pert = float(
+        np.nanmean(np.sqrt((u5_pert - obs5[:, 0]) ** 2 + (v5_pert - obs5[:, 1]) ** 2))
+    )
 
     def _residuals5(vec):
         ur, vr = _project5(gcp5, vec[:3], vec[3:6], gt_up5, vec[6])
@@ -592,29 +661,57 @@ def _(H, W, least_squares, np, perturb_s, plt, tr):
         dyr = np.where(np.isfinite(vr), vr - obs5[:, 1], 1e4)
         return np.concatenate([dxr, dyr])
 
-    res5 = least_squares(_residuals5, np.concatenate([pert_pos5, pert_fwd5, [pert_tr5]]), method="lm")
+    res5 = least_squares(
+        _residuals5, np.concatenate([pert_pos5, pert_fwd5, [pert_tr5]]), method="lm"
+    )
     u5_opt, v5_opt = _project5(gcp5, res5.x[:3], res5.x[3:6], gt_up5, res5.x[6])
-    err_opt = float(np.nanmean(np.sqrt((u5_opt - obs5[:, 0])**2 + (v5_opt - obs5[:, 1])**2)))
+    err_opt = float(
+        np.nanmean(np.sqrt((u5_opt - obs5[:, 0]) ** 2 + (v5_opt - obs5[:, 1]) ** 2))
+    )
 
     fig5, (ax5a, ax5b) = plt.subplots(1, 2, figsize=(11, 4.5))
     fig5.patch.set_facecolor("#1a1a2e")
 
     for ax5, u5p, v5p, title5, err5 in [
         (ax5a, u5_pert, v5_pert, "Perturbed pose (before optimiser)", err_pert),
-        (ax5b, u5_opt,  v5_opt,  "After Levenberg-Marquardt",         err_opt),
+        (ax5b, u5_opt, v5_opt, "After Levenberg-Marquardt", err_opt),
     ]:
         ax5.set_facecolor("#111")
         ax5.add_patch(plt.Rectangle((0, 0), W, H, fill=False, edgecolor="cyan", lw=1))
-        ax5.set_xlim(0, W); ax5.set_ylim(H, 0)
+        ax5.set_xlim(0, W)
+        ax5.set_ylim(H, 0)
         ax5.tick_params(colors="white")
-        ax5.set_title(f"{title5}\nmean reprojection error = {err5:.1f} px",
-                      color="white", fontsize=9)
-        ax5.scatter(obs5[:, 0], obs5[:, 1], color="lime", s=55, zorder=5, label="Observed (operator)")
-        ax5.scatter(u5p, v5p, color="red", marker="x", s=65, lw=1.5, zorder=5, label="Predicted (model)")
+        ax5.set_title(
+            f"{title5}\nmean reprojection error = {err5:.1f} px",
+            color="white",
+            fontsize=9,
+        )
+        ax5.scatter(
+            obs5[:, 0],
+            obs5[:, 1],
+            color="lime",
+            s=55,
+            zorder=5,
+            label="Observed (operator)",
+        )
+        ax5.scatter(
+            u5p,
+            v5p,
+            color="red",
+            marker="x",
+            s=65,
+            lw=1.5,
+            zorder=5,
+            label="Predicted (model)",
+        )
         for i5 in range(len(gcp5)):
             if np.isfinite(u5p[i5]):
-                ax5.annotate("", xy=(u5p[i5], v5p[i5]), xytext=(obs5[i5, 0], obs5[i5, 1]),
-                             arrowprops=dict(arrowstyle="->", color="yellow", lw=1.2))
+                ax5.annotate(
+                    "",
+                    xy=(u5p[i5], v5p[i5]),
+                    xytext=(obs5[i5, 0], obs5[i5, 1]),
+                    arrowprops=dict(arrowstyle="->", color="yellow", lw=1.2),
+                )
         ax5.legend(facecolor="#333", labelcolor="white", fontsize=8)
 
     plt.tight_layout()
@@ -685,7 +782,7 @@ def _(H, W, lstsq, np):
     dx6_raw = 2.5 * xn6 + 0.6 * yn6 + rng6.normal(0, 0.7, n6)
     dy6_raw = 0.4 * xn6 + 2.1 * yn6 + rng6.normal(0, 0.7, n6)
 
-    A6 = np.column_stack([np.ones(n6), xn6, yn6, xn6 ** 2, xn6 * yn6, yn6 ** 2])
+    A6 = np.column_stack([np.ones(n6), xn6, yn6, xn6**2, xn6 * yn6, yn6**2])
     opt_cx6, _, _, _ = lstsq(A6, dx6_raw)
     opt_cy6, _, _, _ = lstsq(A6, dy6_raw)
     return (
@@ -709,13 +806,29 @@ def _(coeff_x6_state, coeff_y6_state, mo):
     _labels = ["const", "x", "y", "x²", "xy", "y²"]
 
     sliders_x6 = mo.ui.array(
-        [mo.ui.slider(-20.0, 20.0, value=float(_cx_init[i]), step=0.05, label=f"cx  [{_labels[i]}]")
-         for i in range(6)],
+        [
+            mo.ui.slider(
+                -20.0,
+                20.0,
+                value=float(_cx_init[i]),
+                step=0.05,
+                label=f"cx  [{_labels[i]}]",
+            )
+            for i in range(6)
+        ],
         label="X-correction coefficients",
     )
     sliders_y6 = mo.ui.array(
-        [mo.ui.slider(-20.0, 20.0, value=float(_cy_init[i]), step=0.05, label=f"cy  [{_labels[i]}]")
-         for i in range(6)],
+        [
+            mo.ui.slider(
+                -20.0,
+                20.0,
+                value=float(_cy_init[i]),
+                step=0.05,
+                label=f"cy  [{_labels[i]}]",
+            )
+            for i in range(6)
+        ],
         label="Y-correction coefficients",
     )
     learn_btn_6 = mo.ui.run_button(label="Learn optimal coefficients from GCPs")
@@ -756,7 +869,7 @@ def _(
     dy_pred6 = A6 @ cy6
     dx_res6 = dx6_raw - dx_pred6
     dy_res6 = dy6_raw - dy_pred6
-    mean_res6 = float(np.mean(np.sqrt(dx_res6 ** 2 + dy_res6 ** 2)))
+    mean_res6 = float(np.mean(np.sqrt(dx_res6**2 + dy_res6**2)))
 
     # Dense warped grid for the warp-field visualisation
     nx_g, ny_g = 24, 14
@@ -765,10 +878,16 @@ def _(
     gxx, gyy = np.meshgrid(gx, gy)
     gxn = (gxx - ox6) / (W / 2.0)
     gyn = (gyy - oy6) / (H / 2.0)
-    A_g6 = np.column_stack([
-        np.ones(gxx.size), gxn.ravel(), gyn.ravel(),
-        gxn.ravel() ** 2, (gxn * gyn).ravel(), gyn.ravel() ** 2,
-    ])
+    A_g6 = np.column_stack(
+        [
+            np.ones(gxx.size),
+            gxn.ravel(),
+            gyn.ravel(),
+            gxn.ravel() ** 2,
+            (gxn * gyn).ravel(),
+            gyn.ravel() ** 2,
+        ]
+    )
     dx_g6 = (A_g6 @ cx6).reshape(gxx.shape)
     dy_g6 = (A_g6 @ cy6).reshape(gyy.shape)
     warped_gx = gxx + dx_g6
@@ -783,12 +902,19 @@ def _(
     ax6a.set_xlim(0, W)
     ax6a.set_ylim(H, 0)
     ax6a.tick_params(colors="white")
-    ax6a.set_title(f"Residuals after poly2  |  mean = {mean_res6:.2f} px", color="white", fontsize=9)
+    ax6a.set_title(
+        f"Residuals after poly2  |  mean = {mean_res6:.2f} px",
+        color="white",
+        fontsize=9,
+    )
     _scale6 = 20
     for _i6 in range(n6):
         ax6a.annotate(
             "",
-            xy=(ctrl_x6[_i6] + dx_res6[_i6] * _scale6, ctrl_y6[_i6] + dy_res6[_i6] * _scale6),
+            xy=(
+                ctrl_x6[_i6] + dx_res6[_i6] * _scale6,
+                ctrl_y6[_i6] + dy_res6[_i6] * _scale6,
+            ),
             xytext=(ctrl_x6[_i6], ctrl_y6[_i6]),
             arrowprops=dict(arrowstyle="->", color="yellow", lw=1.2),
         )
@@ -805,27 +931,42 @@ def _(
     hxx, hyy = np.meshgrid(hx, hy)
     hxn = (hxx - ox6) / (W / 2.0)
     hyn = (hyy - oy6) / (H / 2.0)
-    A_h6 = np.column_stack([
-        np.ones(hxx.size), hxn.ravel(), hyn.ravel(),
-        hxn.ravel() ** 2, (hxn * hyn).ravel(), hyn.ravel() ** 2,
-    ])
+    A_h6 = np.column_stack(
+        [
+            np.ones(hxx.size),
+            hxn.ravel(),
+            hyn.ravel(),
+            hxn.ravel() ** 2,
+            (hxn * hyn).ravel(),
+            hyn.ravel() ** 2,
+        ]
+    )
     hdx = (A_h6 @ cx6).reshape(hxx.shape)
     hdy = (A_h6 @ cy6).reshape(hyy.shape)
-    mag6 = np.sqrt(hdx ** 2 + hdy ** 2)
+    mag6 = np.sqrt(hdx**2 + hdy**2)
     vmax6 = max(float(mag6.max()), 0.5)
 
     ax6b.set_xlim(0, W)
     ax6b.set_ylim(H, 0)
     ax6b.tick_params(colors="white")
-    ax6b.set_title("Correction warp field (displacement magnitude)", color="white", fontsize=9)
+    ax6b.set_title(
+        "Correction warp field (displacement magnitude)", color="white", fontsize=9
+    )
     im6 = ax6b.imshow(
-        mag6, extent=[0, W, H, 0], cmap="plasma",
-        vmin=0, vmax=vmax6, origin="upper", aspect="auto",
+        mag6,
+        extent=[0, W, H, 0],
+        cmap="plasma",
+        vmin=0,
+        vmax=vmax6,
+        origin="upper",
+        aspect="auto",
     )
     for _row in range(ny_g):
         ax6b.plot(warped_gx[_row], warped_gy[_row], color="white", lw=0.7, alpha=0.5)
     for _col in range(nx_g):
-        ax6b.plot(warped_gx[:, _col], warped_gy[:, _col], color="white", lw=0.7, alpha=0.5)
+        ax6b.plot(
+            warped_gx[:, _col], warped_gy[:, _col], color="white", lw=0.7, alpha=0.5
+        )
     ax6b.set_xlabel("Pixel x", color="white")
     ax6b.set_ylabel("Pixel y", color="white")
     cbar6 = fig6.colorbar(im6, ax=ax6b)
@@ -846,12 +987,14 @@ def _(
 
 @app.cell
 def _(fig6, learn_btn_6, mo, note6, sliders_x6, sliders_y6):
-    mo.vstack([
-        mo.hstack([sliders_x6, sliders_y6], justify="start"),
-        learn_btn_6,
-        fig6,
-        note6,
-    ])
+    mo.vstack(
+        [
+            mo.hstack([sliders_x6, sliders_y6], justify="start"),
+            learn_btn_6,
+            fig6,
+            note6,
+        ]
+    )
     return
 
 
@@ -934,7 +1077,7 @@ def _(H, W, np):
     # Nodata gap: 4 columns in the centre simulating terrain outside the model footprint
     _gap7 = ng_c7 // 2
     valid7 = np.ones((ng_r7, ng_c7), dtype=bool)
-    valid7[:, _gap7 - 2:_gap7 + 2] = False
+    valid7[:, _gap7 - 2 : _gap7 + 2] = False
 
     _ri7 = np.repeat(np.arange(ng_r7), ng_c7)
     _ci7 = np.tile(np.arange(ng_c7), ng_r7)
@@ -971,9 +1114,15 @@ def _(H, W, np):
     simps7 = _tri7.simplices
 
     # Classify each simplex: bad if any edge spans more than 3 grid cells (Manhattan)
-    _d01 = np.abs(ri7[simps7[:, 0]] - ri7[simps7[:, 1]]) + np.abs(ci7[simps7[:, 0]] - ci7[simps7[:, 1]])
-    _d02 = np.abs(ri7[simps7[:, 0]] - ri7[simps7[:, 2]]) + np.abs(ci7[simps7[:, 0]] - ci7[simps7[:, 2]])
-    _d12 = np.abs(ri7[simps7[:, 1]] - ri7[simps7[:, 2]]) + np.abs(ci7[simps7[:, 1]] - ci7[simps7[:, 2]])
+    _d01 = np.abs(ri7[simps7[:, 0]] - ri7[simps7[:, 1]]) + np.abs(
+        ci7[simps7[:, 0]] - ci7[simps7[:, 1]]
+    )
+    _d02 = np.abs(ri7[simps7[:, 0]] - ri7[simps7[:, 2]]) + np.abs(
+        ci7[simps7[:, 0]] - ci7[simps7[:, 2]]
+    )
+    _d12 = np.abs(ri7[simps7[:, 1]] - ri7[simps7[:, 2]]) + np.abs(
+        ci7[simps7[:, 1]] - ci7[simps7[:, 2]]
+    )
     good7 = np.maximum(_d01, np.maximum(_d02, _d12)) <= 3
     return checker7, good7, simps7, uv7
 
@@ -997,15 +1146,36 @@ def _(H, W, checker7, good7, mo, np, plt, simplex_filter_s, simps7, uv7):
     ax7a.tick_params(colors="white")
     ax7a.set_title(
         f"Delaunay in output-pixel space  ({int(good7.sum())} good / {int((~good7).sum())} bad simplices)",
-        color="white", fontsize=9,
+        color="white",
+        fontsize=9,
     )
     if len(_good_s7):
-        ax7a.tripcolor(uv7[:, 0], uv7[:, 1], _good_s7,
-                       np.ones(len(_good_s7)), shading="flat", cmap="Blues", vmin=0, vmax=1.5, alpha=0.25)
-        ax7a.triplot(uv7[:, 0], uv7[:, 1], _good_s7, color="steelblue", lw=0.35, alpha=0.5)
+        ax7a.tripcolor(
+            uv7[:, 0],
+            uv7[:, 1],
+            _good_s7,
+            np.ones(len(_good_s7)),
+            shading="flat",
+            cmap="Blues",
+            vmin=0,
+            vmax=1.5,
+            alpha=0.25,
+        )
+        ax7a.triplot(
+            uv7[:, 0], uv7[:, 1], _good_s7, color="steelblue", lw=0.35, alpha=0.5
+        )
     if len(_bad_s7):
-        ax7a.tripcolor(uv7[:, 0], uv7[:, 1], _bad_s7,
-                       np.ones(len(_bad_s7)), shading="flat", cmap="Reds", vmin=0, vmax=1.5, alpha=0.55)
+        ax7a.tripcolor(
+            uv7[:, 0],
+            uv7[:, 1],
+            _bad_s7,
+            np.ones(len(_bad_s7)),
+            shading="flat",
+            cmap="Reds",
+            vmin=0,
+            vmax=1.5,
+            alpha=0.55,
+        )
         ax7a.triplot(uv7[:, 0], uv7[:, 1], _bad_s7, color="red", lw=0.5, alpha=0.7)
     ax7a.scatter(uv7[:, 0], uv7[:, 1], color="lime", s=7, zorder=5)
     ax7a.add_patch(plt.Rectangle((0, 0), W, H, fill=False, edgecolor="cyan", lw=1))
@@ -1013,10 +1183,16 @@ def _(H, W, checker7, good7, mo, np, plt, simplex_filter_s, simps7, uv7):
     ax7a.set_ylabel("Output pixel v", color="white")
     ax7a.legend(
         handles=[
-            _mpatches7.Patch(facecolor="steelblue", alpha=0.5, label="Good (within gap threshold)"),
-            _mpatches7.Patch(facecolor="red", alpha=0.6, label="Bad (bridges nodata gap)"),
+            _mpatches7.Patch(
+                facecolor="steelblue", alpha=0.5, label="Good (within gap threshold)"
+            ),
+            _mpatches7.Patch(
+                facecolor="red", alpha=0.6, label="Bad (bridges nodata gap)"
+            ),
         ],
-        facecolor="#333", labelcolor="white", fontsize=8,
+        facecolor="#333",
+        labelcolor="white",
+        fontsize=8,
     )
 
     # Right panel: draped checkerboard image
@@ -1025,10 +1201,22 @@ def _(H, W, checker7, good7, mo, np, plt, simplex_filter_s, simps7, uv7):
     ax7b.set_ylim(H, 0)
     ax7b.tick_params(colors="white")
     ax7b.set_title(
-        "Draped image — filter ON" if _use_filter else "Draped image — filter OFF  (gap bridged, artefacts visible)",
-        color="white", fontsize=9,
+        "Draped image — filter ON"
+        if _use_filter
+        else "Draped image — filter OFF  (gap bridged, artefacts visible)",
+        color="white",
+        fontsize=9,
     )
-    ax7b.tripcolor(uv7[:, 0], uv7[:, 1], _active_s7, checker7, cmap="gray", vmin=0, vmax=1, shading="gouraud")
+    ax7b.tripcolor(
+        uv7[:, 0],
+        uv7[:, 1],
+        _active_s7,
+        checker7,
+        cmap="gray",
+        vmin=0,
+        vmax=1,
+        shading="gouraud",
+    )
     ax7b.add_patch(plt.Rectangle((0, 0), W, H, fill=False, edgecolor="cyan", lw=1))
     ax7b.set_xlabel("Output pixel u", color="white")
     ax7b.set_ylabel("Output pixel v", color="white")

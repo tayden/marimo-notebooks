@@ -48,11 +48,9 @@ def _():
 @app.cell
 def _():
     file = mo.notebook_location() / "public" / "PruthTides2018_2025_15min.csv"
-    
+
     df_raw = pl.read_csv(str(file))
-    df_raw = df_raw.with_columns(
-        pl.col("time").str.to_datetime() + timedelta(hours=8)
-    )
+    df_raw = df_raw.with_columns(pl.col("time").str.to_datetime() + timedelta(hours=8))
     df_raw
     return (df_raw,)
 
@@ -69,9 +67,7 @@ def _():
 
 @app.cell
 def _(df_raw):
-    df_split = df_raw.with_columns(
-        (pl.col("time").dt.year() >= 2025).alias("is_val")
-    )
+    df_split = df_raw.with_columns((pl.col("time").dt.year() >= 2025).alias("is_val"))
     df, df_val = df_split.partition_by("is_val")
 
     with mo.redirect_stdout():
@@ -171,7 +167,8 @@ def _(coefs, df_val):
     residuals = test_elevation - reconstruction.h
 
     fig = make_subplots(
-        rows=2, cols=1,
+        rows=2,
+        cols=1,
         shared_xaxes=True,
         vertical_spacing=0.08,
         subplot_titles=("Observed vs Fitted", "Residuals"),
@@ -179,22 +176,27 @@ def _(coefs, df_val):
 
     fig.add_trace(
         go.Scatter(x=test_time, y=test_elevation, name="observed", opacity=0.7),
-        row=1, col=1,
+        row=1,
+        col=1,
     )
     fig.add_trace(
         go.Scatter(x=test_time, y=reconstruction.h, name="fitted", opacity=0.7),
-        row=1, col=1,
+        row=1,
+        col=1,
     )
     fig.add_trace(
         go.Scatter(x=test_time, y=residuals, name="residual", showlegend=False),
-        row=2, col=1,
+        row=2,
+        col=1,
     )
     fig.add_hline(y=0, line_dash="dash", line_color="gray", opacity=0.5, row=2, col=1)
 
     fig.update_yaxes(title_text="elevation (m)", row=1, col=1)
     fig.update_yaxes(title_text="residual (m)", row=2, col=1)
     fig.update_xaxes(title_text="time", row=2, col=1)
-    fig.update_layout(height=500, legend=dict(orientation="h", yanchor="bottom", y=1.02))
+    fig.update_layout(
+        height=500, legend=dict(orientation="h", yanchor="bottom", y=1.02)
+    )
 
     fig
     return reconstruction, test_elevation, test_time
@@ -203,9 +205,9 @@ def _(coefs, df_val):
 @app.cell
 def _(reconstruction, test_elevation):
     residuals_1 = test_elevation - reconstruction.h
-    rmse = np.sqrt(np.mean(residuals_1 ** 2))
+    rmse = np.sqrt(np.mean(residuals_1**2))
     mae = np.mean(np.abs(residuals_1))
-    ss_res = np.sum(residuals_1 ** 2)
+    ss_res = np.sum(residuals_1**2)
     ss_tot = np.sum((test_elevation - np.mean(test_elevation)) ** 2)
     r_squared = 1 - ss_res / ss_tot
 
